@@ -136,3 +136,13 @@ class OutputPrivacyTests(unittest.TestCase):
         self.assertNotIn('historical-private-value',cleaned['display'])
         self.assertNotIn('api-key-test-value',cleaned['display'])
         self.assertIn('Tests passed',cleaned['display'])
+
+class ProjectReportFilteringTests(unittest.TestCase):
+    def test_advice_and_login_exchange_do_not_become_test_results(self):
+        turns=[{'status':'completed','items':[{'type':'agentMessage','phase':'final_answer','text':'I’d start with a project board. Show completed work and test results.'}]},
+               {'status':'completed','items':[{'type':'agentMessage','phase':'final_answer','text':'GitHub accepted the login and sent a verification code. What code did you receive?'}]},
+               {'status':'completed','items':[{'type':'agentMessage','phase':'final_answer','text':'[COMPLETE] Published the bridge.\nTests: 51 passed.\nPending: physical Echo check.'}]}]
+        report=project_report([{'name':'Bridge','thread_id':'example'}],lambda _:turns)['display']
+        self.assertNotIn('What code',report);self.assertNotIn('I’d start',report)
+        self.assertIn('Tests: 51 passed',report);self.assertIn('physical Echo check',report)
+        self.assertNotIn('[COMPLETE]',report)

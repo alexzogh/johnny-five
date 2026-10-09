@@ -107,12 +107,18 @@ def project_report(projects, read_turns):
                 if turn.get('status') != 'completed':
                     continue
                 finals = [i.get('text', '') for i in turn.get('items', []) if i.get('type') == 'agentMessage' and i.get('phase') in ('final_answer', 'final')]
-                if finals: answers.append('\n'.join(finals))
+                if finals:
+                    report = '\n'.join(finals)
+                    report = re.sub(r'\[(?:COMPLETE|STATUS|COMMENTARY)\]\s*', '', report)
+                    # Exclude advice/authentication exchanges from work progress.
+                    is_advice = bool(re.search(r"^I[’']d (?:start|recommend)|^You don[’']t need to log in|verification code|^Close or minimize", report, re.I))
+                    if not is_advice and re.search(r'\b(published|installed|implemented|fixed|removed|updated|created|deployed|finished|passed|verified|completed)\b', report, re.I):
+                        answers.append(report)
                 if len(answers) >= 3: break
             lines += ['Recent completed-work reports (historical):', *(a[:1800] for a in answers)] if answers else ['No completed-work report in the inspected history.']
             reports = '\n'.join(answers)
-            tests = [l for l in reports.splitlines() if re.search(r'\b(test|tests|tested|verification|checks)\b', l, re.I)]
-            blockers = [l for l in reports.splitlines() if re.search(r'\b(blocked|blocker|pending|awaiting|decision|approval|remaining)\b', l, re.I)]
+            tests = [l for l in reports.splitlines() if re.search(r'\b(test|tests|tested|verification|checks)\b.*\b(pass(?:ed)?|fail(?:ed|ure)?|run|ran|OK|[0-9]+)\b', l, re.I)]
+            blockers = [l for l in reports.splitlines() if re.search(r'^\s*(?:[-*]\s*)?(?:blocked|blocker|pending|awaiting|decision|approval|remaining)(?:\s|:)|\b(?:is|remains|still) blocked\b', l, re.I)]
             lines += ['Reported tests: ' + ('; '.join(tests)[:1800] or 'Not recorded in recent reports.'),
                       'Reported blockers/decisions: ' + ('; '.join(blockers)[:1800] or 'Not recorded in recent reports.')]
         except Exception:
