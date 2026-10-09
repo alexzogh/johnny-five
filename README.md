@@ -11,7 +11,7 @@ Ordinary requests go to Hermes. Explicit “ask Codex” requests queue into you
 Examples:
 
 - “Alexa, ask Johnny Five to please explain solar battery terminology.”
-- “Alexa, ask Johnny Five to ask Hermes to help me plan a project.”
+- “Alexa, ask Johnny Five to help me plan a project.”
 - “Alexa, ask Johnny Five to ask Codex to summarize our pending work.”
 - “Alexa, ask Johnny Five for the status of my last request.”
 
@@ -19,13 +19,13 @@ Examples:
 
 **House status dashboard**
 
-“Alexa, ask Johnny Five to ask Hermes to give me a dashboard of the status of the house.”
+“Alexa, ask Johnny Five to give me a dashboard of the status of the house.”
 
 Or use the fixed shortcut: “Alexa, ask Johnny Five for a house briefing.” With Hermes connected to your Home Assistant tools and a house snapshot, the result can show temperatures, maintenance flags, low batteries, network/power readings, and pending tasks. The response is a text dashboard on a supported Echo screen or an Alexa app card, rather than a new web dashboard. Unavailable or historical readings should be labeled; this request does not control equipment.
 
 **A turkey recipe from your library**
 
-“Alexa, ask Johnny Five to ask Hermes to use the recipes library to find a recipe with turkey.”
+“Alexa, ask Johnny Five to use the recipes library to find a recipe with turkey.”
 
 With a recipe-library skill and source documents installed in Hermes, ask for servings, measured ingredients, cooking temperature, steps, and the source. Hermes supplies a short spoken overview and the complete recipe for the display/card. This repository does not include your recipe collection.
 
@@ -37,7 +37,7 @@ For a clearer answer, name the project: “Alexa, ask Johnny Five to ask Codex f
 
 **Find a good movie in Plex tonight**
 
-“Alexa, ask Johnny Five to ask Hermes to use Plex to find a good movie to watch tonight.”
+“Alexa, ask Johnny Five to find a good movie to watch tonight.”
 
 Add a preference such as “under two hours” or “a science fiction movie we haven't watched.” Hermes needs a configured Plex tool or media-concierge skill with library access. Recommendations should distinguish titles already playable in your library from anything that still needs downloading. This example requests recommendations, not an automatic download.
 
