@@ -151,3 +151,90 @@ To roll back, stop/disable `johnny-five.service`, remove only its HTTPS proxy/Fu
 - [Amazon: APL support](https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-support-for-your-skill.html)
 - [Hermes API server](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)
 - [Codex app-server](https://learn.chatgpt.com/docs/app-server)
+
+### Routines, progress, troubleshooting, and handoffs
+
+* **Morning briefing:** “Alexa, ask Johnny Five to give me my morning briefing.”
+  Combines current house attention and recorded Codex project status. Weather and
+  calendar appear explicitly as disconnected until a current provider snapshot is
+  connected. Evening and development briefings are also available. These are
+  on-demand spoken routines, not scheduled Alexa smart-home routines.
+* **Task progress:** “Alexa, ask Johnny Five, is my last request finished?”
+  Reads queue/running/completed/failure state and actual recorded timing without
+  restarting work. It prefers this Echo's request, then your account's last request.
+  Percent complete and ETA are not fabricated. Reported blockers and decisions are
+  excerpts from the answer, not automatic approvals.
+* **Troubleshooting:** “Alexa, ask Johnny Five to troubleshoot the living room TV.”
+  Hermes reads Home Assistant state, available history and existing network records.
+  It distinguishes missing readings from proven failures, reports evidence times,
+  and asks for clarification when a name is ambiguous. The diagnostic prompt forbids
+  service calls, configuration changes, restarts, port scans and physical actions.
+  Hermes retains its existing tool permissions; this is not a sandbox or a new
+  technical read-only Home Assistant account.
+* **Echo handoff:** On the original Echo say “prepare a handoff.” Within fifteen
+  minutes, open Johnny Five on another Echo and say “resume my handoff” or “resume
+  my cooking.” This explicitly transfers the last completed answer and recipe step
+  for the same enrolled Amazon account. It never reexecutes the request. There is
+  one handoff slot per account; the most recently prepared one wins. Each Echo
+  then navigates independently. Alexa account identity is not individual-speaker
+  identity. No automatic announcements or cross-device playback are sent.
+* **Private activity page:** A phone-friendly, read-only page shows the last 40
+  requests, written answers, timestamps and explicitly reported decisions. Refresh
+  updates the view; there are no execution or approval buttons.
+
+Private `ROUTINES_FILE` may contain:
+
+```json
+{
+  "morning": {"title": "Morning briefing", "sections": ["house", "projects", "weather", "calendar"]},
+  "evening": {"title": "Evening briefing", "sections": ["house", "projects"]}
+}
+```
+
+Only `house`, `projects`, `weather`, `calendar`, and `email` are supported sections;
+configuration never contains shell commands or executable model prompts.
+An optional private `BRIEFING_SOURCES_FILE` provides snapshots from separately
+connected read-only providers:
+
+```json
+{
+  "calendar": {"sampled_at": "2026-10-09T12:00:00Z", "display": "Today's upcoming events"}
+}
+```
+
+Weather snapshots expire after three hours; email/calendar after one hour. Missing,
+stale, invalid, or failed sources are labeled. Configuring a file does not authorize
+or connect Google OAuth. Both files require mode 600 or stricter and belong outside
+this repository. No calendar/email credentials are shipped.
+
+### Private phone access
+
+The activity listener is separate from the public, Amazon-signed `/alexa` endpoint.
+Set `ACTIVITY_PORT` (default `9121`) and `ACTIVITY_USERS` in private configuration.
+`ACTIVITY_USERS` is a JSON string mapping each permitted **Tailscale login** to the
+specific enrolled **Alexa account IDs** it may view. Example placeholder:
+
+```json
+"ACTIVITY_USERS": "{\"owner@example.invalid\":[\"YOUR_ENROLLED_ALEXA_ACCOUNT_ID\"]}"
+```
+
+The listener binds **127.0.0.1 only**, rejects missing/unlisted identity headers,
+filters every history query by mapped accounts, escapes answers, and redacts known
+credentials. Keep local processes trusted. Use private Tailscale Serve on a separate
+port, for example:
+
+```sh
+tailscale serve --bg --https=8443 http://127.0.0.1:9121
+```
+
+Open `https://YOUR_VM.YOUR_TAILNET.ts.net:8443/` on a phone signed into an allowed
+Tailscale account. Serve supplies and protects the identity headers. **Never expose
+this activity port through Funnel, a LAN listener, or a proxy that trusts caller
+identity headers.** Keep the public Alexa endpoint on its existing distinct port.
+Tagged clients do not receive user identity headers and cannot open this page.
+See [Tailscale Serve identity documentation](https://tailscale.com/docs/features/tailscale-serve#identity-headers).
+
+The page serves `/` and a read-only `/api/activity`; all responses disable caching.
+History stays in your private queue database and is not uploaded to this repository.
+The additive lifecycle table records new request start/finish times; older requests
+may have no timing records. Rollback can keep the same queue database.

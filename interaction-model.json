@@ -349,9 +349,108 @@
           "name": "AMAZON.RepeatIntent",
           "slots": [],
           "samples": []
+        },
+        {
+          "name": "TaskProgressIntent",
+          "samples": [
+            "is my last request finished",
+            "what is my task progress",
+            "check my last task",
+            "is my request still running"
+          ]
+        },
+        {
+          "name": "MorningRoutineIntent",
+          "samples": [
+            "give me my morning briefing",
+            "run my morning routine",
+            "my morning briefing"
+          ]
+        },
+        {
+          "name": "EveningRoutineIntent",
+          "samples": [
+            "give me my evening briefing",
+            "run my evening routine"
+          ]
+        },
+        {
+          "name": "DevelopmentRoutineIntent",
+          "samples": [
+            "give me my development briefing",
+            "run my development routine"
+          ]
+        },
+        {
+          "name": "RoutineIntent",
+          "slots": [
+            {
+              "name": "routine",
+              "type": "JOHNNY_ROUTINE"
+            }
+          ],
+          "samples": [
+            "run the {routine} routine",
+            "give me the {routine} briefing"
+          ]
+        },
+        {
+          "name": "TroubleshootIntent",
+          "slots": [
+            {
+              "name": "device",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "why is {device} offline",
+            "troubleshoot {device}",
+            "diagnose the connection for {device}"
+          ]
+        },
+        {
+          "name": "SaveHandoffIntent",
+          "samples": [
+            "prepare a handoff",
+            "save my cooking handoff",
+            "prepare my recipe handoff"
+          ]
+        },
+        {
+          "name": "ResumeHandoffIntent",
+          "samples": [
+            "resume my handoff",
+            "resume my cooking",
+            "pick up my handoff"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
         }
       ],
-      "types": []
+      "types": [
+        {
+          "name": "JOHNNY_ROUTINE",
+          "values": [
+            {
+              "name": {
+                "value": "morning"
+              }
+            },
+            {
+              "name": {
+                "value": "evening"
+              }
+            },
+            {
+              "name": {
+                "value": "development"
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }
