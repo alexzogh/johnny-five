@@ -13,7 +13,10 @@
           ],
           "samples": [
             "please {request}",
-            "help me with {request}"
+            "help me with {request}",
+            "give me {request}",
+            "use {request}",
+            "find {request}"
           ]
         },
         {
@@ -207,6 +210,145 @@
             "recommend a movie",
             "movie recommendations"
           ]
+        },
+        {
+          "name": "AttentionIntent",
+          "slots": [],
+          "samples": [
+            "what needs my attention",
+            "what needs attention",
+            "anything new I should know about"
+          ]
+        },
+        {
+          "name": "ProjectBoardIntent",
+          "slots": [],
+          "samples": [
+            "my project board",
+            "codex project status",
+            "what did codex finish",
+            "what is blocked in codex"
+          ]
+        },
+        {
+          "name": "RecipeHelpIntent",
+          "slots": [],
+          "samples": [
+            "recipes",
+            "cooking help"
+          ]
+        },
+        {
+          "name": "RecipeIntent",
+          "slots": [
+            {
+              "name": "request",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "find a recipe with {request}",
+            "find a recipe for {request}",
+            "cook something with {request}"
+          ]
+        },
+        {
+          "name": "FollowUpIntent",
+          "slots": [
+            {
+              "name": "request",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "tell me more about {request}",
+            "what about {request}",
+            "follow up with {request}"
+          ]
+        },
+        {
+          "name": "ShorterIntent",
+          "slots": [],
+          "samples": [
+            "find something shorter",
+            "something shorter"
+          ]
+        },
+        {
+          "name": "BatteryDetailsIntent",
+          "slots": [],
+          "samples": [
+            "tell me more about the batteries",
+            "more battery details"
+          ]
+        },
+        {
+          "name": "StartCookingIntent",
+          "slots": [],
+          "samples": [
+            "start cooking",
+            "read the first step"
+          ]
+        },
+        {
+          "name": "NextStepIntent",
+          "slots": [],
+          "samples": [
+            "next step",
+            "read the next step"
+          ]
+        },
+        {
+          "name": "PreviousStepIntent",
+          "slots": [],
+          "samples": [
+            "previous step",
+            "go back a step"
+          ]
+        },
+        {
+          "name": "RepeatStepIntent",
+          "slots": [],
+          "samples": [
+            "repeat the step",
+            "read that step again"
+          ]
+        },
+        {
+          "name": "ScaleRecipeIntent",
+          "slots": [
+            {
+              "name": "servings",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "scale it for {servings} people",
+            "scale the recipe for {servings} servings"
+          ]
+        },
+        {
+          "name": "RefreshIntent",
+          "slots": [],
+          "samples": [
+            "refresh",
+            "refresh the result"
+          ]
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "slots": [],
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PreviousIntent",
+          "slots": [],
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "slots": [],
+          "samples": []
         }
       ],
       "types": []

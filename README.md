@@ -45,6 +45,26 @@ The optional direct media shortcut is “Alexa, ask Johnny Five for something to
 
 For each example, wait for the queue acknowledgment, then say: **“Alexa, ask Johnny Five for the status of my last request.”** If it is still working, ask again later. Devices without screens still speak the summary; written detail is available in the Alexa app.
 
+## Conversational features
+
+- **Attention:** “What needs my attention?” compares a fresh read-only house report with your previous successful check. The first check explicitly establishes a baseline; subsequent checks show new/changed flags and items no longer flagged. Known offline entities can be excluded. Unavailable/stale monitoring never produces an all-clear or overwrites the baseline. Dated recovery inspections are not current backup failures; live backup alerts require a current backup monitor in your report.
+- **Follow-ups:** “Tell me more about the batteries” or “Find something shorter” uses the previous completed answer on the same device. A follow-up refines an answer without replaying the original action. Hermes remains the default; refinements of explicit Codex requests stay with Codex.
+- **Echo dashboard:** House, Attention, Recipes, Movies, Codex, and Refresh buttons use fixed bridge-controlled actions. Refresh polls the queued request without submitting another. On smaller screens, swipe the horizontal button strip.
+- **Cooking:** “Find a recipe with turkey,” then “Start cooking,” “Next step,” “Previous step,” or “Repeat the step.” The screen keeps ingredients and the current step visible. “Scale it for six people” asks Hermes to reread the source and produce a scaled recipe, with assumptions labeled. Cooking requires a valid structured recipe; arbitrary plain-text answers do not become invented steps.
+- **Project board:** “My project board” reads configured Codex conversation histories, recent completed-work reports, reported tests, blockers/decisions, and turn timestamps. It does not launch a task, rerun tests, or deploy. Historical reports are labeled; unavailable history is reported honestly.
+
+After an acknowledgment, say **“Refresh”** or tap Refresh. The skill keeps supported response sessions open for follow-up, but Alexa's session timeout still applies; after it closes, invoke Johnny Five again. Context is stored privately by Amazon account and device for up to 12 hours, not by individual speaker. The skill does not push unsolicited completion notifications.
+
+Attention checks use an optional `HOUSE_REPORT_BIN` executable, called with the fixed argument `briefing`. It must output JSON with a current `sampled_at`, `maintenance`, `low_batteries`, `unavailable`, and `network` arrays. Rows use `entity_id`, `name`, `state`, and optional `updated`. `KNOWN_OFFLINE_ENTITIES` is a comma-separated exclusion list. Optional `backups` rows with `failed`/`error` states can report live backup failures. No house report provider is installed by this repository.
+
+For several projects, set `PROJECTS_FILE` to a private, mode-600 JSON file containing objects with `name` and `thread_id`, for example:
+
+```json
+[{"name": "Dashboard project", "thread_id": "YOUR_EXISTING_CONVERSATION_ID"}]
+```
+
+These IDs must belong to the existing managed Codex app-server on this host. Other VMs are not connected automatically: Hermes can use explicitly configured integrations/tools, while another Codex host would need its own authenticated adapter. This version does not grant new SSH access or remote execution rights.
+
 ## Private configuration
 
 Copy the example **outside the checkout** and fill it locally:
@@ -68,6 +88,9 @@ The bridge reads that file by default. Set `JOHNNY_FIVE_CONFIG` to use another p
 | `HERMES_API_KEY` | Hermes API bearer key. |
 | `STATE_DIRECTORY` | Private durable queue directory, outside the checkout. |
 | `MEDIA_CONCIERGE_PATH` | Optional path to an independently installed compatible media concierge module. |
+| `HOUSE_REPORT_BIN` | Read-only executable returning the current house report as JSON. |
+| `KNOWN_OFFLINE_ENTITIES` | Comma-separated entities intentionally excluded from attention flags. |
+| `PROJECTS_FILE` | Optional private JSON list of project names and Codex thread IDs. |
 
 No Amazon developer username or password belongs in this configuration. Sign into the developer console separately to register the skill. Use the skill-specific `context.System.user.userId` from a simulator request, not an access token.
 
@@ -96,6 +119,8 @@ Hermes must expose its authenticated API privately to this host and accept `/v1/
 Codex must already be authenticated with a managed app-server and an existing conversation. This bridge uses `codex queue`, the app-server's private Unix control socket, WebSockets, and paginated turn history. Those interfaces are version-sensitive; check compatibility with your installation. Do not expose the app-server or start a competing daemon. Queue acceptance alone is not treated as completion.
 
 ## Alexa developer console
+
+You need an **Amazon developer account/login** to create and configure the custom skill in the [Alexa developer console](https://developer.amazon.com/alexa/console/ask). Use the Amazon account associated with your Echo devices for household development testing. This is separate from an AWS account; the self-hosted bridge does not require AWS compute hosting.
 
 1. Create a Custom skill named **Johnny Five**, English (US), **Provision your own**, **Start from Scratch**.
 2. Paste `interaction-model.json` into the Interaction Model JSON editor; save and build.

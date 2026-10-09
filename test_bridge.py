@@ -177,7 +177,7 @@ class BridgeTests(unittest.TestCase):
         directive = response['directives'][0]
         self.assertEqual(directive['type'], 'Alexa.Presentation.APL.RenderDocument')
         items = directive['document']['mainTemplate']['items'][0]['items']
-        self.assertEqual(items[1]['type'], 'ScrollView')
+        self.assertTrue(any(item['type'] == 'ScrollView' for item in items))
         self.assertIn('2 lbs chicken', directive['datasources']['answer']['text'])
         self.assertNotIn('2 lbs chicken', response['outputSpeech']['text'])
 
