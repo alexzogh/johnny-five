@@ -251,7 +251,7 @@ class Backends:
                         statuses.append(status)
                         sections.append(section.title() + '\n' + answer_parts(result)[2])
                         summary = answer_parts(result)[1]
-                        spoken.append(summary.split('. ', 1)[0] + '.' if section == 'house' else summary[:250])
+                        spoken.append(summary.split('. ', 1)[0].rstrip('.') + '.' if section == 'house' else summary[:250])
                     except Exception:
                         statuses.append('unavailable'); sections.append(section.title() + ': source unavailable.')
                 else:

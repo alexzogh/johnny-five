@@ -95,12 +95,12 @@ class EngagementTests(unittest.TestCase):
         try:
             for headers in ({},{'Tailscale-User-Login':'wrong@example.invalid'}):
                 with self.assertRaises(urllib.error.HTTPError) as error:urllib.request.urlopen(urllib.request.Request(url,headers=headers))
-                self.assertEqual(error.exception.code,403)
+                self.assertEqual(error.exception.code,403); error.exception.close()
             req=urllib.request.Request(url+'/api/activity',headers={'Tailscale-User-Login':'owner@example.invalid'})
             with urllib.request.urlopen(req) as response:
                 self.assertEqual(response.headers['Cache-Control'],'no-store');self.assertTrue(json.load(response)['read_only'])
             with self.assertRaises(urllib.error.HTTPError) as error:urllib.request.urlopen(urllib.request.Request(url,data=b'{}',headers={'Tailscale-User-Login':'owner@example.invalid'}))
-            self.assertEqual(error.exception.code,405)
+            self.assertEqual(error.exception.code,405); error.exception.close()
         finally:server.shutdown();server.server_close()
     def test_activity_mapping_requires_enrolled_account(self):
         for mapping in ({},{'owner@example.invalid':['unapproved']},{'owner@example.invalid':[]}):
