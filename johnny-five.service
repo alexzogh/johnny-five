@@ -1,0 +1,16 @@
+[Unit]
+Description=Johnny Five Alexa bridge
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/workspaces/johnny-five
+Environment=JOHNNY_FIVE_CONFIG=%h/.config/johnny-five/config.json
+ExecStart=%h/workspaces/johnny-five/.venv/bin/python bridge.py
+Restart=on-failure
+RestartSec=15
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

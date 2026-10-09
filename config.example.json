@@ -1,0 +1,11 @@
+{
+  "ALEXA_SKILL_ID": "",
+  "ALEXA_USER_IDS": "",
+  "CODEX_THREAD_ID": "",
+  "CODEX_BIN": "~/.local/bin/codex",
+  "CODEX_WORKSPACE": "~/workspaces",
+  "HERMES_URL": "",
+  "HERMES_API_KEY": "",
+  "STATE_DIRECTORY": "~/.local/share/johnny-five",
+  "MEDIA_CONCIERGE_PATH": ""
+}
