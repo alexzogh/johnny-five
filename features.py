@@ -111,7 +111,7 @@ def project_report(projects, read_turns):
                     report = '\n'.join(finals)
                     report = re.sub(r'\[(?:COMPLETE|STATUS|COMMENTARY)\]\s*', '', report)
                     # Exclude advice/authentication exchanges from work progress.
-                    is_advice = bool(re.search(r"^I[’']d (?:start|recommend)|^You don[’']t need to log in|verification code|^Close or minimize", report, re.I))
+                    is_advice = bool(re.search(r"^I[’']d (?:start|recommend)|^You don[’']t need to log in|verification code|\b(?:password|username|credentials?|login|sign-in)\b|^Close or minimize", report, re.I))
                     if not is_advice and re.search(r'\b(published|installed|implemented|fixed|removed|updated|created|deployed|finished|passed|verified|completed)\b', report, re.I):
                         answers.append(report)
                 if len(answers) >= 3: break
