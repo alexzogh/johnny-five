@@ -39,13 +39,13 @@ def routine_settings(config):
     return routines
 
 
-def source_section(name, config, now=None):
+def source_section(name, config, now=None, sources=None):
     """Optional external provider snapshots. Never infer OAuth from a file's presence."""
     now = time.time() if now is None else now
-    if not config.get('BRIEFING_SOURCES_FILE'):
+    if sources is None and not config.get('BRIEFING_SOURCES_FILE'):
         return name.title() + ': not connected.'
     try:
-        sources = private_json(config['BRIEFING_SOURCES_FILE'])
+        if sources is None: sources = private_json(config['BRIEFING_SOURCES_FILE'])
         source = sources.get(name, {})
         sampled = datetime.datetime.fromisoformat(source['sampled_at'].replace('Z', '+00:00'))
         if sampled.tzinfo is None: raise ValueError('Timestamp needs timezone')
@@ -57,6 +57,18 @@ def source_section(name, config, now=None):
         return name.title() + ' (sampled ' + source['sampled_at'] + ')\n' + source['display'][:4000]
     except (ValueError, KeyError, TypeError, AttributeError, OSError):
         return name.title() + ': current source unavailable.'
+
+
+def source_summary(name, config, sources=None):
+    display = source_section(name, config, sources=sources)
+    if any(marker in display for marker in (': not connected.', ': source is stale;', ': current source unavailable.')):
+        return display
+    try:
+        data = sources if sources is not None else private_json(config['BRIEFING_SOURCES_FILE'])
+        speech = data[name].get('speech')
+        if isinstance(speech, str) and speech: return speech[:220]
+    except (OSError, ValueError, KeyError, TypeError): pass
+    return name.title() + ': current details are in the full briefing.'
 
 
 def progress_answer(row, now=None):

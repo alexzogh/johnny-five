@@ -109,3 +109,43 @@ class EngagementTests(unittest.TestCase):
         job=self.store.submit('legacy','owner','hermes','Question')
         with self.store.connect() as db:self.assertEqual(len(db.execute('SELECT * FROM jobs WHERE id=?',(job,)).fetchone()),7)
         self.assertEqual(self.store.progress('other',job),None)
+
+class SourceProviderTests(unittest.TestCase):
+    def test_provider_uses_only_search_and_calendar_list_and_preserves_times(self):
+        from briefing_sources import snapshots
+        import datetime
+        calls=[]
+        def google(args):
+            calls.append(args)
+            if args[0]=='gmail':return [{'date':'Friday','from':'Sender','subject':'A subject'}]
+            return [{'summary':'Meeting','start':{'dateTime':'2026-10-10T09:00:00-04:00'}}]
+        data=snapshots(run_google=google,get_states=lambda:[],now=datetime.datetime(2026,10,9,tzinfo=datetime.timezone.utc))
+        self.assertEqual(calls[0][:3],['gmail','search','is:unread newer_than:7d'])
+        self.assertEqual(calls[1][:2],['calendar','list']);self.assertNotIn('send',str(calls));self.assertNotIn('modify',str(calls))
+        self.assertIn('09:00:00-04:00',data['calendar']['display']);self.assertIn('nothing marked read',data['email']['display'])
+        self.assertEqual(data['weather']['error'],'source_unavailable')
+    def test_unavailable_google_provider_never_returns_a_false_empty_inbox(self):
+        from briefing_sources import snapshots
+        def unavailable(_):raise RuntimeError('private credential problem')
+        data=snapshots(run_google=unavailable,get_states=lambda:[])
+        self.assertEqual(data['email']['error'],'source_unavailable');self.assertNotIn('private credential',json.dumps(data))
+        self.assertNotIn('No matching unread',data['email']['display'])
+
+    def test_weather_rejects_stale_readings_and_reports_current_units(self):
+        from briefing_sources import snapshots
+        import datetime
+        now=datetime.datetime(2026,10,9,12,tzinfo=datetime.timezone.utc)
+        row={'entity_id':'weather.home','state':'sunny','last_updated':'2026-10-09T11:30:00Z','attributes':{'temperature':70,'temperature_unit':'°F'}}
+        data=snapshots(run_google=lambda _:[],get_states=lambda:[row],now=now)
+        self.assertIn('70 °F',data['weather']['speech'])
+        row['last_updated']='2026-10-08T00:00:00Z'
+        self.assertEqual(snapshots(run_google=lambda _:[],get_states=lambda:[row],now=now)['weather']['error'],'source_unavailable')
+
+    def test_external_source_summary_is_used_only_for_fresh_valid_data(self):
+        from engagement import source_summary
+        import datetime
+        stamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
+        sources={'calendar':{'sampled_at':stamp,'display':'Meeting at 9 AM','speech':'One upcoming event.'}}
+        self.assertEqual(source_summary('calendar',{},sources),'One upcoming event.')
+        sources['calendar']['error']='source_failed'
+        self.assertIn('unavailable',source_summary('calendar',{},sources))

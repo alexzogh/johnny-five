@@ -238,3 +238,22 @@ The page serves `/` and a read-only `/api/activity`; all responses disable cachi
 History stays in your private queue database and is not uploaded to this repository.
 The additive lifecycle table records new request start/finish times; older requests
 may have no timing records. Rollback can keep the same queue database.
+
+For fresh routine sources instead of a prewritten snapshot, set the private
+`BRIEFING_SOURCE_BIN` to a trusted, fixed executable returning the same JSON schema.
+The bridge invokes it without caller arguments or a shell and reports failures
+honestly. `briefing_sources.py` is an optional provider intended to run **inside
+Hermes**, where its Google Workspace skill and OAuth files already live. It uses
+only Gmail search/header reads, Calendar list calls for the primary calendar's
+next24hours, and Home Assistant HTTPGET weather states. It does not send email,
+mark messages read, create events, request device actions, or expose credentials.
+Weather readings older than3hours are rejected; this is current weather, not a
+new forecast-service call. Email is a capped sample of recent unread headers,
+not a full unread count or an automatic urgency assessment. Other calendars need
+separate configuration. Optional provider spoken summaries are also included.
+
+Install/authenticate Hermes's Google Workspace skill separately. Keep the provider
+on the host with the tokens; connect the bridge through a restricted authenticated
+read-only transport. Do not copy OAuth tokens into this repository or open a generic
+remote command endpoint. The provider uses the existing Hermes Python environment
+and `HERMES_HOME`, plus its existing `HASS_URL`/`HASS_TOKEN` settings for weather.

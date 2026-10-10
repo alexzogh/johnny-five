@@ -17,7 +17,7 @@ import importlib.util
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from features import structured, recipe_data, attention_report, project_report, redact_result
-from engagement import routine_settings, source_section, progress_answer, activity_server
+from engagement import routine_settings, source_section, source_summary, progress_answer, activity_server
 
 ROOT = Path(__file__).resolve().parent
 
@@ -244,6 +244,15 @@ class Backends:
             if prompt not in routines: return 'unavailable', 'That routine is not configured.'
             routine = routines[prompt]
             sections, statuses, spoken = [], [], []
+            sources = None
+            if self.config.get('BRIEFING_SOURCE_BIN') and any(s in ('email', 'calendar', 'weather') for s in routine['sections']):
+                try:
+                    output = subprocess.run([self.config['BRIEFING_SOURCE_BIN']], capture_output=True, text=True, timeout=110)
+                    if output.returncode: raise RuntimeError('Briefing provider unavailable')
+                    sources = json.loads(output.stdout)
+                    if not isinstance(sources, dict): raise ValueError('Invalid source response')
+                except Exception:
+                    sources = {}
             for section in routine['sections']:
                 if section in ('house', 'projects'):
                     try:
@@ -255,10 +264,11 @@ class Backends:
                     except Exception:
                         statuses.append('unavailable'); sections.append(section.title() + ': source unavailable.')
                 else:
-                    sections.append(source_section(section, self.config))
+                    sections.append(source_section(section, self.config, sources=sources))
+                    spoken.append(source_summary(section, self.config, sources=sources))
             text = '\n\n'.join(sections)
             speech = routine['title'] + '. ' + ('Some connected sources are unavailable. ' if 'unavailable' in statuses else '')
-            speech += ' '.join(spoken)[:650]
+            speech += ' '.join(spoken)[:1000]
             speech += ' See the full briefing for source times and any disconnected sections.'
             return 'completed', json.dumps({'title': routine['title'], 'speech': speech, 'display': text})
         if target == 'troubleshoot':
@@ -649,7 +659,7 @@ def load_config(path=None):
         if not isinstance(settings, dict) or any(not isinstance(v, str) for v in settings.values()):
             raise ValueError('Configuration must be a JSON object of string values')
     settings.update(os.environ)
-    for key in ('CODEX_BIN', 'CODEX_WORKSPACE', 'MEDIA_CONCIERGE_PATH', 'STATE_DIRECTORY', 'HOUSE_REPORT_BIN', 'PROJECTS_FILE', 'ROUTINES_FILE', 'BRIEFING_SOURCES_FILE'):
+    for key in ('CODEX_BIN', 'CODEX_WORKSPACE', 'MEDIA_CONCIERGE_PATH', 'STATE_DIRECTORY', 'HOUSE_REPORT_BIN', 'PROJECTS_FILE', 'ROUTINES_FILE', 'BRIEFING_SOURCES_FILE', 'BRIEFING_SOURCE_BIN'):
         if settings.get(key):
             settings[key] = str(Path(settings[key]).expanduser())
     return settings
